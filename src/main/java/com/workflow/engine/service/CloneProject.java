@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class cloneProject {
+public class CloneProject {
 	@Value("${build: default value something}")
 	private String build;
 	
@@ -165,7 +165,8 @@ public class cloneProject {
 				}
 	
 			}
-			copyJenkinsfileToRepo();
+			File Jenkinsfile_in_repo = new File("./cloned_repo/Jenkinsfile"); 
+			copyJenkinsfileToRepo(Jenkinsfile_in_repo, jenkinsfile_path);
 			return jenkinsfile_path;
 	
 	}
@@ -199,8 +200,7 @@ public class cloneProject {
 		}
 	}
 	
-	public void copyJenkinsfileToRepo() throws IOException {
-		File Jenkinsfile_in_repo = new File("./cloned_repo/Jenkinsfile"); 
+	public void copyJenkinsfileToRepo(File JenkinsfileInRepo, File jenkinsfilePath) throws IOException {
 		/*
 		try {
 			
@@ -212,8 +212,8 @@ public class cloneProject {
 	    FileInputStream is = null;
 	    OutputStream os = null;
 	    try {
-	        is = new FileInputStream(jenkinsfile_path);
-	        os = new FileOutputStream(Jenkinsfile_in_repo);
+	        is = new FileInputStream(jenkinsfilePath);
+	        os = new FileOutputStream(JenkinsfileInRepo);
 	        byte[] buffer = new byte[1024];
 	        int length;
 	        while ((length = is.read(buffer)) > 0) {
@@ -225,7 +225,7 @@ public class cloneProject {
 	    }
 	}
 	
-	public void runUnixCommand(String cmd) {
+	public boolean runUnixCommand(String cmd) {
         try {
 //            String target = new String("./test.sh");
             //String target = new String("mkdir stackOver");
@@ -239,8 +239,10 @@ public class cloneProject {
                     output.append(line + "\n");
             }
             System.out.println("### " + output);
+            return true;
 	    } catch (Throwable t) {
 	            t.printStackTrace();
+	           return false;
 	    }
 	}
  
