@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@EnableDiscoveryClient
 public class CloneProject {
 	@Value("${build: default value something}")
 	private String build;
