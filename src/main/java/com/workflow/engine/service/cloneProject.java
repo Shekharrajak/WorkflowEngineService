@@ -84,6 +84,12 @@ public class cloneProject {
             .build();
             */
 		
+		// remove the present /cloned_repo folder
+		if (cloned_repo_path.exists()) {
+			runUnixCommand("rm -rf " + cloned_repo_path);
+		}
+		
+		
         Git git = Git.cloneRepository()
         		  .setURI( project_url1 )
         		  .setDirectory( cloned_repo_path )
@@ -96,32 +102,58 @@ public class cloneProject {
 	}
 	
 	private File jenkinsfile_path = new File("./jenkinsFolder/Jenkinsfile"); 
-//	@RequestMapping("/generateJenkinsfile")
+	@RequestMapping("/generateJenkinsfile")
 	public Object generateJenkinsFile() throws IOException {
 		createfile(jenkinsfile_path);
-		BufferedWriter bw = null;
+		BufferedWriter writer = null;
 		FileWriter fw = null;
 
 			try {
 	
-				String content = "This is the content to write into file\n";
-	
 				fw = new FileWriter(jenkinsfile_path);
-				bw = new BufferedWriter(fw);
-				bw.write(content);
-	
+				writer = new BufferedWriter(fw);
+				 StringBuilder sb = new StringBuilder();
+		          writer.append("pipeline {\n");
+		          writer.append("        agent { docker any }\n");
+		          writer.append("        stages {\n");
+		          writer.append("            steps {\n");
+
+
+		              if(build != null)
+		              {
+		                  writer.append("              sh '"+ build +"' \n");
+		              }
+		              if(compile != null)
+		              {
+		                  writer.append("              sh '"+ compile +"' \n");
+		              }
+		              
+		              if(test != null)
+		              {
+		                  writer.append("              sh '"+ test +"' \n");
+		              }
+		              
+		              if(run != null)
+		              {
+		                  writer.append("              sh '"+ run +"' \n");
+		              }
+		          writer.append("                       }\n");
+		          writer.append("               }\n");
+		          writer.append("         }\n");
+		    	
 				System.out.println("Done");
 	
 			} catch (IOException e) {
 	
-				e.printStackTrace();
+//				e.printStackTrace();
+				System.out.println("Unable to generate files and folder.");
 	
 			} finally {
 	
 				try {
 	
-					if (bw != null)
-						bw.close();
+					if (writer != null)
+						writer.close();
 	
 					if (fw != null)
 						fw.close();
@@ -138,47 +170,6 @@ public class cloneProject {
 	
 	}
 	
-	@RequestMapping("/generateJenkinsfile")
-	public Object makeJenkinsfile() throws IOException {
-	  //      ["build" , "test" ,"run"]
-//      BufferedReader br = new BufferedReader(new FileReader("./application.properties"));
-		createfile(jenkinsfile_path);
-      BufferedWriter writer = new BufferedWriter(new FileWriter(jenkinsfile_path));
-
-          StringBuilder sb = new StringBuilder();
-//          String line = br.readLine();
-          writer.append("pipeline {\n");
-          writer.append("        agent { docker any }\n");
-          writer.append("        stages {\n");
-          writer.append("            steps {\n");
-
-
-              if(build != null)
-              {
-                  writer.append("              sh '"+ build +"' \n");
-              }
-              if(compile != null)
-              {
-                  writer.append("              sh '"+ compile +"' \n");
-              }
-              
-              if(test != null)
-              {
-                  writer.append("              sh '"+ test +"' \n");
-              }
-              
-              if(run != null)
-              {
-                  writer.append("              sh '"+ run +"' \n");
-              }
-          writer.append("                       }\n");
-          writer.append("               }\n");
-          writer.append("         }\n");
-          writer.close();
-          copyJenkinsfileToRepo();
-			return jenkinsfile_path;
-      
-	}
 	
 	public void createfile(File path) throws IOException {
 		/* create the dir first */
@@ -231,6 +222,25 @@ public class cloneProject {
 	    } finally {
 	        is.close();
 	        os.close();
+	    }
+	}
+	
+	public void runUnixCommand(String cmd) {
+        try {
+//            String target = new String("./test.sh");
+            //String target = new String("mkdir stackOver");
+            Runtime rt = Runtime.getRuntime();
+            Process proc = rt.exec(cmd);
+            proc.waitFor();
+            StringBuffer output = new StringBuffer();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+            String line = "";                       
+            while ((line = reader.readLine())!= null) {
+                    output.append(line + "\n");
+            }
+            System.out.println("### " + output);
+	    } catch (Throwable t) {
+	            t.printStackTrace();
 	    }
 	}
  
